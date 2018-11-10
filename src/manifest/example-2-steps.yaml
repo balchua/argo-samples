@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: steps-
+  namespace: my-project
+spec:
+  entrypoint: app-jobs
+
+  # This spec contains two templates: hello-hello-hello and whalesay
+  templates:
+  - name: app-jobs
+    # Instead of just running a container
+    # This template has a sequence of steps
+    steps:
+    - - name: task1            #hello1 is run before the following steps
+        template: run-and-sleep
+        arguments:
+          parameters:
+          - name: message
+            value: "task1"
+          - name: sleeptime
+            value: "20"
+    - - name: task2a           #double dash => run after previous step
+        template: run-and-sleep
+        arguments:
+          parameters:
+          - name: message
+            value: "task2a"
+          - name: sleeptime
+            value: "10"
+      - name: task2b           #single dash => run in parallel with previous step
+        template: run-and-sleep
+        arguments:
+          parameters:
+          - name: message
+            value: "task2b"
+          - name: sleeptime
+            value: "40"
+
+  - name: run-and-sleep
+    inputs:
+      parameters:
+      - name: message
+      - name: sleeptime
+    container:
+      image: balchu/argo-sample:1.0
+      command: [run.sh]
+      args: ["{{inputs.parameters.message}}","{{inputs.parameters.sleeptime}}"]

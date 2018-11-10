@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: argo-sample-
+  namespace: my-project
+spec:
+  entrypoint: run
+  templates:
+  - name: run
+    container:
+      image: balchu/argo-sample:1.0
+      command: [run.sh]
+      args: ["TASK1", "5"]

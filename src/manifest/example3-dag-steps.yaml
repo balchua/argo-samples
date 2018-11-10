@@ -1,0 +1,67 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dag-diamond-
+spec:
+  entrypoint: diamond
+  templates:
+  - name: run-and-sleep
+    inputs:
+      parameters:
+      - name: message
+      - name: sleeptime
+    container:
+      imagePullPolicy: Always
+      image: balchu/argo-sample:1.1
+      command: [run.sh]
+      args: ["{{inputs.parameters.message}}","{{inputs.parameters.sleeptime}}"]
+  - name: fail-job
+    inputs:
+      parameters:
+      - name: message
+      - name: sleeptime
+    container:
+      image: balchu/argo-sample:1.2-failed
+      imagePullPolicy: Always
+      command: [run-with-failure.sh]
+      args: ["{{inputs.parameters.message}}","{{inputs.parameters.sleeptime}}"]
+
+  - name: diamond
+    dag:
+      tasks:
+      - name: A
+        template: run-and-sleep
+        arguments:
+          parameters:
+          - name: message
+            value: "task1"
+          - name: sleeptime
+            value: "5"
+      - name: B
+        dependencies: [A]
+        template: run-and-sleep
+        arguments:
+          parameters:
+          - name: message
+            value: "task1"
+          - name: sleeptime
+            value: "20"
+      - name: C
+        dependencies: [A]
+        template: fail-job
+        arguments:
+          parameters:
+          - name: message
+            value: "task1"
+          - name: sleeptime
+            value: "50"
+
+      - name: D
+        dependencies: [B, C]
+        template: run-and-sleep
+        arguments:
+          parameters:
+          - name: message
+            value: "task1"
+          - name: sleeptime
+            value: "10"
