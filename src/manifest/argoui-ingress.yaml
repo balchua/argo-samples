@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: argo
+  namespace: argo
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: argoui.geek.per.sg
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: argo-ui
+          servicePort: 80
