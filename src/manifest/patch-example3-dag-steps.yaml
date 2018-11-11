@@ -21,7 +21,7 @@ spec:
       - name: message
       - name: sleeptime
     container:
-      image: balchu/run-and-fail:1.0
+      image: balchu/run-and-fail:1.1
       command: [run-with-failure.sh]
       args: ["{{inputs.parameters.message}}","{{inputs.parameters.sleeptime}}"]
 
